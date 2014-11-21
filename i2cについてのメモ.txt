@@ -1,0 +1,26 @@
+□ I2C通信
+- 必要なもの
+	SCL シリアルクロック ポート	-> A5ポート
+	SDA シリアルデータ ポート	-> A4ポート
+	（SCL、SDAは外部抵抗でプルアップする必要あり）
+	
+- setup
+	デバイスアドレスに対して“WHO_AM_I”を送る -> 0x0Fを書き込む
+	（L3GD20と通信できていれば0xD4が返される）
+	
+	XYZ軸をenableにするため、CTRL_REG1に0x0Fを書き込む
+	（CTRL_REG1のアドレスは0x20）
+
+- loop
+	X軸の番地　L：0x28、H：0x29
+	Y軸の番地　L：0x2A、H：0x2B
+	Z軸の番地　L：0x2C、H：0x2D
+	
+	それぞれの角速度は2進数（2の補数）で返される
+	HHHHHHHHLLLLLLLLの16bit
+	
+	そのため、Hをreadして、左に8ビットシフトさせている
+	HHHHHHHH -> HHHHHHHH00000000
+	この数値にLをORで合算している
+	HHHHHHHH00000000 | LLLLLLLL = HHHHHHHHLLLLLLLL
+	これでそれぞれの軸の角速度が得られる
